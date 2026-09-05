@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识库朗读版 Demo</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; max-width: 860px; margin: 0 auto; padding: 24px; background: #fafafa; color: #333; }
+  h1 { font-size: 22px; border-bottom: 2px solid #4a90d9; padding-bottom: 8px; }
+  h2 { font-size: 18px; color: #2c5f8a; margin-top: 32px; }
+  table { border-collapse: collapse; width: 100%; background: #fff; margin: 12px 0; }
+  th, td { border: 1px solid #ddd; padding: 8px 10px; font-size: 14px; text-align: left; }
+  th { background: #eef4fa; }
+  .speak-btn {
+    cursor: pointer; border: none; background: none; font-size: 16px;
+    padding: 2px 6px; border-radius: 4px; transition: background .15s;
+  }
+  .speak-btn:hover { background: #e3f0fb; }
+  .speak-btn.playing { background: #4a90d9; }
+  .ipa { color: #888; font-size: 13px; }
+  .tip { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 10px 14px; font-size: 13px; color: #795548; }
+</style>
+</head>
+<body>
+
+<h1>📖 知识库朗读版 <small style="font-size:13px;color:#999;">（Demo：点击 🔊 即可朗读）</small></h1>
+
+<p class="tip">💡 使用浏览器内置语音合成，<b>无需联网</b>。点击任意 🔊 按钮即朗读对应英文术语。</p>
+
+<h2>5G 三大应用场景</h2>
+<table>
+  <tr><th>缩写</th><th>全称（点击朗读）</th><th>中文</th><th>音标</th><th>特征</th></tr>
+  <tr>
+    <td><b>eMBB</b></td>
+    <td>enhanced Mobile Broadband <button class="speak-btn" data-text="enhanced Mobile Broadband">🔊</button></td>
+    <td>增强移动宽带</td>
+    <td class="ipa">/ɪnˈhænst ˈməʊbaɪl ˈbrɔːdbænd/</td>
+    <td>大带宽（快）</td>
+  </tr>
+  <tr>
+    <td><b>uRLLC</b></td>
+    <td>ultra-Reliable Low Latency Communications <button class="speak-btn" data-text="ultra-Reliable and Low Latency Communications">🔊</button></td>
+    <td>超高可靠超低时延通信</td>
+    <td class="ipa">/ˈʌltrə rɪˈlaɪəbl ænd ləʊ ˈleɪtənsi/</td>
+    <td>低时延+高可靠（准）</td>
+  </tr>
+  <tr>
+    <td><b>mMTC</b></td>
+    <td>massive Machine Type Communications <button class="speak-btn" data-text="massive Machine Type Communications">🔊</button></td>
+    <td>海量机器类通信</td>
+    <td class="ipa">/ˈmæsɪv məˈʃiːn taɪp/</td>
+    <td>海量连接（多）</td>
+  </tr>
+</table>
+
+<h2>存储架构</h2>
+<table>
+  <tr><th>缩写</th><th>全称（点击朗读）</th><th>中文</th><th>通俗比喻</th></tr>
+  <tr>
+    <td><b>DAS</b></td>
+    <td>Direct Attached Storage <button class="speak-btn" data-text="Direct Attached Storage">🔊</button></td>
+    <td>直连式存储</td>
+    <td>外接移动硬盘</td>
+  </tr>
+  <tr>
+    <td><b>NAS</b></td>
+    <td>Network Attached Storage <button class="speak-btn" data-text="Network Attached Storage">🔊</button></td>
+    <td>网络附加存储</td>
+    <td>插在路由器上的U盘</td>
+  </tr>
+  <tr>
+    <td><b>SAN</b></td>
+    <td>Storage Area Network <button class="speak-btn" data-text="Storage Area Network">🔊</button></td>
+    <td>存储区域网络</td>
+    <td>高速传送带连接的仓库</td>
+  </tr>
+</table>
+
+<h2>容灾指标</h2>
+<table>
+  <tr><th>缩写</th><th>全称（点击朗读）</th><th>含义</th></tr>
+  <tr>
+    <td><b>RPO</b></td>
+    <td>Recovery Point Objective <button class="speak-btn" data-text="Recovery Point Objective">🔊</button></td>
+    <td>能容忍的数据丢失量（管"丢多少"）</td>
+  </tr>
+  <tr>
+    <td><b>RTO</b></td>
+    <td>Recovery Time Objective <button class="speak-btn" data-text="Recovery Time Objective">🔊</button></td>
+    <td>能容忍的业务中断时间（管"断多久"）</td>
+  </tr>
+</table>
+
+<script>
+  const synth = window.speechSynthesis;
+  let currentBtn = null;
+
+  document.querySelectorAll('.speak-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      synth.cancel(); // 打断上一个朗读
+      if (currentBtn) currentBtn.classList.remove('playing');
+
+      const utter = new SpeechSynthesisUtterance(btn.dataset.text);
+      utter.lang = 'en-US';
+      utter.rate = 0.85; // 稍慢，便于跟读学习
+
+      // 优先选择英文女声/美式发音
+      const voices = synth.getVoices();
+      const enVoice = voices.find(v => v.lang.startsWith('en') && v.localService) || voices.find(v => v.lang.startsWith('en'));
+      if (enVoice) utter.voice = enVoice;
+
+      btn.classList.add('playing');
+      currentBtn = btn;
+      utter.onend = () => btn.classList.remove('playing');
+
+      synth.speak(utter);
+    });
+  });
+
+  // 某些浏览器需要异步加载语音列表
+  synth.getVoices();
+</script>
+
+</body>
+</html>
